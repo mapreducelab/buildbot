@@ -3,6 +3,7 @@ package git
 import (
 	"buildbot/models"
 	"fmt"
+	"os"
 
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
@@ -38,6 +39,10 @@ func (g Git) Clone(c models.Component) (Result, error) {
 		return Result{}, errors.New("component passed to Clone is empty")
 	}
 	workDir := fmt.Sprintf("%s/%s", g.RootWorkDir, c.ID)
+	if err := os.RemoveAll(workDir); err != nil {
+		errDesc := fmt.Sprintf("while removing \"%s\", got an error", workDir)
+		return Result{}, errors.New(errDesc)
+	}
 
 	_, err := git.PlainClone(workDir, false, &git.CloneOptions{
 		URL: c.GitUrl,
